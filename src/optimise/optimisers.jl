@@ -457,10 +457,14 @@ NADAM(η = 0.001, β = (0.9, 0.999)) = NADAM(η, β, IdDict())
 function apply!(o::NADAM, x, Δ)
   η, β = o.eta, o.beta
 
-  mt, vt, βp = get!(o.state, x) do
-    (zero(x), zero(x), Float64[o.beta[1], o.beta[2]])
-  end :: Tuple{typeof(x),typeof(x),Vector{Float64}}
-  β1p, β2p = βp
+  β1p, β2p = o.beta
+  mt, vt = get!(o.state, x, (zero(x), zero(x)))
+  βp = Float64[β1p, β2p]
+
+  #mt, vt, βp = get!(o.state, x) do
+  #  (zero(x), zero(x), Float64[o.beta[1], o.beta[2]])
+  #end :: Tuple{typeof(x),typeof(x),Vector{Float64}}
+  #β1p, β2p = βp
 
   @. mt = β[1] * mt + (1 - β[1]) * Δ
   @. vt = β[2] * vt + (1 - β[2]) * Δ^2
